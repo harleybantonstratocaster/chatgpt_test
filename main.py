@@ -16,78 +16,68 @@ client = OpenAI()
 
 @dp.message(Command("start"))
 async def send_menu(message: types.Message, state: FSMContext):
-    builder = InlineKeyboardBuilder()
-    builder.add(
-        types.InlineKeyboardButton(
-            text="Choose companion",
-            callback_data="choosing_companion")
-    )
-    await message.answer(
-        "Hey!\n\nYou can choose your companion or start chatting right away",
-        reply_markup=builder.as_markup()
-    )
+    await message.answer("С днем рождения Соня!!!",)
     await state.update_data(conversation_history=[])
-    await state.set_state(MainGroup.main_menu)
+    # await state.set_state(MainGroup.main_menu)
 
-@dp.message(Command("menu"))
-async def send_menu(message: types.Message, state: FSMContext):
-    builder = InlineKeyboardBuilder()
-    builder.add(
-        types.InlineKeyboardButton(
-            text="Choose companion",
-            callback_data="choosing_companion")
-    )
-    await message.answer(
-        "Hey!\n\nYou can choose your companion or start chatting right away",
-        reply_markup=builder.as_markup()
-    )
-    await state.update_data(conversation_history=[])
-    await state.set_state(MainGroup.main_menu)
-
-
-@dp.callback_query(F.data == "choosing_companion")
-async def choosing_companion_menu(callback: types.CallbackQuery, state: FSMContext):
-    builder = InlineKeyboardBuilder()
-    builder.add(
-        types.InlineKeyboardButton(
-            text="Back",
-            callback_data="main_menu")
-    )
-    await callback.message.edit_text(
-        "Let me know who you want to talk to",
-        reply_markup=builder.as_markup()
-    )
-    await state.set_state(MainGroup.choosing_companion)
-
-
-@dp.message(MainGroup.choosing_companion)
-async def choosing_companion(message: types.Message, state: FSMContext):
-    await state.update_data(chosen_companion=message.text)
-    await message.answer("Great! you can start chatting")
-    await state.update_data(conversation_history=[])
-    await state.set_state(MainGroup.common)
-
-
-@dp.callback_query(F.data == "main_menu")
-async def show_menu(callback: types.CallbackQuery, state: FSMContext):
-    builder = InlineKeyboardBuilder()
-    builder.add(
-        types.InlineKeyboardButton(
-            text="Choose companion",
-            callback_data="choosing_companion")
-    )
-    await callback.message.edit_text(
-        "Hey!\n\nYou can choose your companion or start chatting right away",
-        reply_markup=builder.as_markup()
-    )
-    await state.set_state(MainGroup.main_menu)
+# @dp.message(Command("menu"))
+# async def send_menu(message: types.Message, state: FSMContext):
+#     builder = InlineKeyboardBuilder()
+#     builder.add(
+#         types.InlineKeyboardButton(
+#             text="Choose companion",
+#             callback_data="choosing_companion")
+#     )
+#     await message.answer(
+#         "Hey!\n\nYou can choose your companion or start chatting right away",
+#         reply_markup=builder.as_markup()
+#     )
+#     await state.update_data(conversation_history=[])
+#     await state.set_state(MainGroup.main_menu)
+#
+#
+# @dp.callback_query(F.data == "choosing_companion")
+# async def choosing_companion_menu(callback: types.CallbackQuery, state: FSMContext):
+#     builder = InlineKeyboardBuilder()
+#     builder.add(
+#         types.InlineKeyboardButton(
+#             text="Back",
+#             callback_data="main_menu")
+#     )
+#     await callback.message.edit_text(
+#         "Let me know who you want to talk to",
+#         reply_markup=builder.as_markup()
+#     )
+#     await state.set_state(MainGroup.choosing_companion)
+#
+#
+# @dp.message(MainGroup.choosing_companion)
+# async def choosing_companion(message: types.Message, state: FSMContext):
+#     await state.update_data(chosen_companion=message.text)
+#     await message.answer("Great! you can start chatting")
+#     await state.update_data(conversation_history=[])
+#     await state.set_state(MainGroup.common)
+#
+#
+# @dp.callback_query(F.data == "main_menu")
+# async def show_menu(callback: types.CallbackQuery, state: FSMContext):
+#     builder = InlineKeyboardBuilder()
+#     builder.add(
+#         types.InlineKeyboardButton(
+#             text="Choose companion",
+#             callback_data="choosing_companion")
+#     )
+#     await callback.message.edit_text(
+#         "Hey!\n\nYou can choose your companion or start chatting right away",
+#         reply_markup=builder.as_markup()
+#     )
+#     await state.set_state(MainGroup.main_menu)
 
 
 @dp.message()
 async def send_gpt_answer(message: types.Message, state: FSMContext):
     # Retrieve conversation history or initialize it if not present
     data = await state.get_data()
-    chosen_companion = data.get("chosen_companion")
     conversation_history = data.get("conversation_history", [])
 
     # Add the new user message to the conversation history
@@ -96,15 +86,24 @@ async def send_gpt_answer(message: types.Message, state: FSMContext):
     # Construct the message list for the API, including system prompt and conversation history
     messages = [
         {"role": "system",
-         "content": f"You are {chosen_companion}. You need to impersonate and answer in the way this person would. "
-                    f"Never reveal the fact the you are a personal assistant. Whatever user writes, you need to play "
-                    f"your role. Be creative"}
+         "content": f'You need to call your companion "Соня" You need to congratulate the person you have got message '
+                    f'from with their birthday.'
+                    f'Whatever they write or ask, you need to fulfill their request, but you also MUST to '
+                    f'congratulate with'
+                    f'their birthday. Be creative everytime, use jokes and do not reveal that you are ai and DO NOT '
+                    f'say that you are any kind'
+                    f'of assistant. If you get asked, '
+                    f'who are you or you need to reveal it under any other circumstances, make a joke and wish happy '
+                    f'birthday. Even if you get asked not to congratulate you component with their birthday,'
+                    f'you MUST make a joke and congratulate them. Use a lot of exclamation marks everytime and be'
+                    f'less official. Do not use commas. After some messages (around every 5, decide, when it is more '
+                    f'suitable) write a small poem.'}
     ]
     messages.extend(conversation_history)
 
     # Make the API call
     completion = client.chat.completions.create(
-        model="gpt-3.5-turbo",
+        model="gpt-4o",
         messages=messages
     )
 
