@@ -11,7 +11,7 @@ from config_reader import config
 logging.basicConfig(level=logging.INFO)
 bot = Bot(token=config.bot_token.get_secret_value())
 dp = Dispatcher()
-client = OpenAI()
+client = OpenAI(api_key=config.openai.get_secret_value())
 
 
 @dp.message(Command("start"))
